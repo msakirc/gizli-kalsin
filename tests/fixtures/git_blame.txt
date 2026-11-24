@@ -1,0 +1,2 @@
+3f9a2c1b (Ömer Çelik   2026-11-20 10:12:01 +0300 12)     total = sum(lines)
+^9b1c2d3 (Ayşe Demir     2026-11-01 08:30:44 +0300 13)     return total

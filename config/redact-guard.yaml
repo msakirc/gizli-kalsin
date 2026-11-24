@@ -1,0 +1,116 @@
+# redact-guard configuration. Every key is optional.
+
+upstream: https://api.anthropic.com
+
+# Proxy mode (`python -m redact_guard proxy`): HTTPS proxy + local CA. Claude Code keeps
+# talking to api.anthropic.com, so Remote Control works; this proxy redacts it.
+proxy:
+  host: 127.0.0.1
+  port: 8788
+  # confdir: ~/.local/share/redact-guard/mitm      # local CA lives here (private key 0600)
+
+# The proxy that's already on this machine. redact-guard sits in front of it:
+#   Claude Code -> redact-guard -> your existing proxy -> internet
+# Only Claude Code is pointed at redact-guard; every other program is unaffected.
+corporate_proxy:
+  url: auto        # auto = HTTPS_PROXY/HTTP_PROXY of redact-guard's environment, else the
+                   #        Windows system proxy. Or: none | http://proxy.corp:8080
+  # auth_env: CORP_PROXY_AUTH   # env var holding "user:password" for a Basic-auth proxy
+  ca: system       # trust the OS store + Mozilla when connecting upstream (needed for
+                   # TLS-inspecting proxies: Zscaler, Netskope, ...). Or: certifi | /path/ca.pem
+
+# Gateway mode (`python -m redact_guard serve`): Claude Code uses ANTHROPIC_BASE_URL.
+listen:
+  host: 127.0.0.1          # container mode: 0.0.0.0 (see container/docker-compose.yml)
+  port: 8787
+
+# Proxy-held API key (strongest): Claude Code never holds the real key.
+# Set e.g. ANTHROPIC_API_KEY in the gateway's environment, and give Claude Code
+# a dummy ANTHROPIC_AUTH_TOKEN. Leave unset to pass your claude.ai login through.
+# api_key_env: ANTHROPIC_API_KEY
+
+# Anything except POST /v1/messages and /v1/messages/count_tokens is refused
+# unless it's a body-less GET/HEAD. Set to "passthrough" only for debugging.
+unknown_post: block
+
+vault:
+  dir: ~/.local/share/redact-guard     # encrypted token<->value map (0600)
+  key_file: ~/.config/redact-guard/key # 48 random bytes, created on first run (0600)
+  persist: true                        # false = forget everything on restart
+  min_exact_len: 6
+
+audit_log: ~/.local/share/redact-guard/audit.jsonl   # counts and token classes only, never values
+
+# image/PDF blocks can't be redacted. strip = replace with a note (default), allow = send.
+binary_blocks: strip
+
+# Show real values in Claude's replies in your terminal (local only).
+restore_in_text: true
+
+# Last-line check: refuse a request if any vaulted value is still in it.
+canary: true
+
+# Which token classes are put back into tool inputs, per tool category.
+# Classes: SECRET PRIVKEY USER EMAIL IP IPPRIV IPV6 HOST PHONE TCKN VKN IBAN CARD PERSON CUSTOM
+# restore:
+#   file: ALL            # Edit/Write/MultiEdit/NotebookEdit
+#   local_read: ALL      # Read/Grep/Glob
+#   shell: [USER, EMAIL, IP, IPPRIV, IPV6, HOST, PERSON]   # never secrets or ID numbers
+#   remote: []           # WebFetch/WebSearch/mcp__*
+#   other: [USER, EMAIL, IP, IPPRIV, IPV6, HOST, PERSON]
+
+detectors:
+  # Your own account name(s). Hidden as USER everywhere, so commands that contain them still run.
+  # Set this if your username looks like an ID number (e.g. a TCKN). The isolated installers
+  # add the installing user; a per-user install adds its own account if it's distinctive.
+  # own_usernames: [10000000146]
+  # Hostnames under these suffixes become HOST tokens. Add your own domains.
+  # internal_domains: replaces the built-in list (.internal .corp .local .lan .intra .intranet
+  #   .home.arpa + managed cloud DB endpoints like .rds.amazonaws.com). Prefer extra_internal_domains.
+  # Suffixes, no wildcards needed: .acme.com.tr hides acme.com.tr itself and every name under it
+  # (a.b.acme.com.tr), in any letter case. A broad suffix like .tr works too, but also hides
+  # public sites (gov portals, vendors), which Claude then can't look up on the web.
+  extra_internal_domains: []          # e.g. [.acme.com.tr, .acme.io, .corp-internal-tld]
+  allow_values: []                    # values never redacted
+  allow_digests: []                   # sha256 of values never redacted (`redact-guard digest`)
+  gitleaks: true                      # ~220 Gitleaks provider token rules (bundled, MIT)
+  # gitleaks_rules: ~/my-gitleaks.toml
+  allow_emails: []                    # e.g. [ci-bot@acme.io]
+  allow_email_domains: []
+  allow_users: []                     # e.g. [ubuntu, node, root]
+  # names_file: ~/.config/redact-guard/names.txt   # one person/customer name per line
+  custom: []
+  #  - pattern: '\bACME-[0-9]{6}\b'         # whole match, or a (?P<value>...) group
+  #    class: CUSTOM
+  entropy: true
+  entropy_threshold: 4.3
+  phones: true
+  turkish_ids: true        # TCKN + VKN (labelled always; unlabelled when checksum-valid)
+  vkn_unkeyed: true        # set false if checksum-valid 10-digit numbers are too noisy for you
+  cards: true
+  git_identities: true     # git log/blame/shortlog/trailers/config names -> PERSON
+  allow_names: []          # names that may stay readable (bots, Claude are allowed by default)
+  public_hosts: []         # extra public hosts to keep readable in URLs (github.com etc. by default)
+
+# Outbound allowlist for everything that isn't Anthropic.
+#  - proxy mode: enforced by the proxy itself. Claude's shell inherits HTTPS_PROXY from the
+#    Claude Code settings, so `curl https://attacker/...` through the proxy is refused.
+#    Direct connections that skip the proxy need a network boundary too (README: Windows
+#    firewall -Strict / VM egress rules, or the Linux sandbox).
+#  - container mode: a separate CONNECT proxy for the dev container on `port`.
+# Anthropic hosts are always allowed in proxy mode (they're redacted, not filtered).
+egress:
+  enabled: false           # recommended: true, once you've listed what your builds need
+  port: 8788
+  ports: [443]
+  allow:
+    - registry.npmjs.org
+    - pypi.org
+    - files.pythonhosted.org
+    - repo.maven.apache.org
+    - repo1.maven.org
+    # Write-capable hosts (github.com, gitlab.com, your git server) let a prompt-injected
+    # `git push` carry data out. Add them only if Claude must reach them from the shell.
+    # Container mode: claude.ai login refresh needs Anthropic's auth hosts; check the
+    # egress_denied lines in the log and add what you need. api.anthropic.com is always refused
+    # there (model traffic must use the gateway). In proxy mode, see `egress_denied` in audit.jsonl.

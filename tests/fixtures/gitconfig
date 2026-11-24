@@ -1,0 +1,7 @@
+[user]
+	name = Ömer Çelik
+	email = omer.celik@acme-corp.com.tr
+[remote "origin"]
+	url = https://omer:ghp_aBcDeFgHiJkLmNoPqRsTuVwXyZ0123456789@github.com/acme/orders.git
+[core]
+	editor = vim

@@ -1,0 +1,15 @@
+commit 3f9a2c1b7d4e5f60718293a4b5c6d7e8f9012345
+Author: Ömer Çelik <omer.celik@acme-corp.com.tr>
+Date:   Fri Nov 20 10:12:01 2026 +0300
+
+    Fix order totals
+
+    Co-authored-by: Ayşe Demir <ayse.demir@gmail.com>
+    Signed-off-by: Mehmet Kaya <mkaya@acme-corp.com.tr>
+    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+commit 9b1c2d3e4f5061728394a5b6c7d8e9f001122334
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Thu Nov 19 09:00:00 2026 +0300
+
+    Bump aiohttp

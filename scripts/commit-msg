@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# git commit-msg hook: refuse commit messages that contain redact-guard placeholders.
+pattern='RDX_[A-Z][A-Z0-9]*_[0-9a-f]{12}'
+if grep -Eq "$pattern" "$1"; then
+  echo "redact-guard: the commit message contains a redaction placeholder; use real names/values." >&2
+  exit 1
+fi
+exit 0

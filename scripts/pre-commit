@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# git pre-commit hook: refuse to commit redact-guard placeholders.
+# A placeholder in a staged file means a value didn't get restored (e.g. Claude
+# wrote it through the shell). Commit the real value or fix the file instead.
+#   install:  scripts/install-git-hook.sh /path/to/repo
+set -euo pipefail
+pattern='RDX_[A-Z][A-Z0-9]*_[0-9a-f]{12}'
+# --text: also look inside files git classifies as binary; drop only the "+++ b/path" headers,
+# so content lines that themselves start with "+" (e.g. "++RDX_...") are still checked.
+hits=$(git diff --cached --diff-filter=ACMR --text -U0 --no-color --no-ext-diff \
+        | grep -aE '^\+' | grep -avE '^\+\+\+ (b/|"b/|/dev/null)' | grep -aE "${pattern}" || true)
+if [[ -n "$hits" ]]; then
+  echo "redact-guard: staged changes contain redaction placeholders:" >&2
+  git diff --cached --text --name-only -G "$pattern" | sed 's/^/  /' >&2
+  echo "Replace them with the real values (or remove them) before committing." >&2
+  exit 1
+fi
+exit 0

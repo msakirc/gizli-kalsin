@@ -1,0 +1,4 @@
+{"database": {"host": "db01.acme.corp", "user": "svc_orders", "password": "j8Kd#2mZ!q", "port": 5432},
+ "integrity": "sha512-z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg==",
+ "commit": "3f9a2c1b7d4e5f60718293a4b5c6d7e8f9012345",
+ "privateKey": "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA1234\n-----END RSA PRIVATE KEY-----"}

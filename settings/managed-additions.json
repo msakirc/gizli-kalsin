@@ -1,0 +1,14 @@
+{
+  "_comment": "Optional, strongest host setup. Merge these keys into the rendered settings and install the result as /etc/claude-code/managed-settings.json (needs root). allowedProviders requires Claude Code v2.1.285+.",
+  "allowedProviders": ["customEndpoint"],
+  "allowManagedHooksOnly": true,
+  "allowManagedPermissionRulesOnly": true,
+  "permissions": {
+    "disableAutoMode": "disable"
+  },
+  "sandbox": {
+    "network": {
+      "allowManagedDomainsOnly": true
+    }
+  }
+}

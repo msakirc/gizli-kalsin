@@ -1,0 +1,12 @@
+[project]
+name = "redact-guard"
+version = "0.1.0"
+description = "Reversible-redaction gateway and guardrails for Claude Code"
+requires-python = ">=3.10"
+dependencies = ["aiohttp>=3.9", "pyyaml>=6", "cryptography>=42", "mitmproxy>=11"]
+
+[project.scripts]
+redact-guard = "redact_guard.__main__:main"
+
+[tool.setuptools]
+packages = ["redact_guard"]

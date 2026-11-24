@@ -1,0 +1,23 @@
+# Key shapes seen in real Spring/Helm projects (values are made up).
+app:
+  _MYCUSTOMPASSWORD: Rz7!kLm2Qp
+  _VERIFICATION_RS_URL: https://verify-rs.acme-corp.com.tr/api/v1/verify
+  MY_SERVER_ADDRESS: 10.42.7.15:8443
+  MY_SERVER_ADDRESS2: app-srv-01.prod.acme-corp.com.tr
+  basicAuthenticationPassword: "B4s1c#Auth2026"
+  basicAuthenticationUsername: svc_orders_basic
+  DIS_SERVIS: ${_DIS_SERVIS:http://dis-servis.acme-corp.com.tr:8080/dis/api}
+  DIS_SERVIS_LOCAL: ${_DIS_SERVIS_LOCAL:http://dis-servis:8080/dis/api}
+  ODEME_SERVIS_URL: "${ODEME_URL:https://odeme.acme-corp.com.tr:9443/odeme}"
+  dbPassword: ${DB_PASSWORD:Pg#Dflt2026x}
+  dbPasswordRef: ${DB_PASSWORD}
+  nestedUrl: ${OUTER:${INNER:https://nested.acme-corp.com.tr/x}}
+  spring.datasource.url: jdbc:postgresql://pg-main.db.acme-corp.com.tr:5432/orders
+  logLevel: ${LOG_LEVEL:info}
+  basicAuthenticationEnabled: true
+  authorizationUrl: ${AUTH_URL}
+  serviceClass: com.acme.orders.OrderService
+  homepage_url: https://github.com/acme/orders
+  callbackUrl: http://127.0.0.1:3000/callback
+  server:
+    port: 8080

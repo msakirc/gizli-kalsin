@@ -1,0 +1,15 @@
+<!-- redact-guard:begin -->
+## Redacted values (redact-guard)
+
+Sensitive values reach you as placeholders like `RDX_SECRET_3fa9c2b1d0e4`, `RDX_IPPRIV_…`,
+`RDX_HOST_…`, `RDX_USER_…`, `RDX_EMAIL_…`, `RDX_PERSON_…`, `RDX_VKN_…`, `RDX_TCKN_…`.
+
+- Treat each placeholder as the real value. Copy it **exactly** (all 12 characters) into
+  Edit/Write/Read/Grep inputs; the gateway substitutes the real value locally.
+- Never guess, decode, shorten or reconstruct a placeholder, and don't ask the user to reveal it.
+- In shell commands, hosts, IPs, users, emails and names work as placeholders. Secrets and
+  ID numbers do not: reference them through environment variables or config files
+  (e.g. `"$DB_PASSWORD"`, `--env-file .env`).
+- Commands that read databases are blocked by design. Don't look for workarounds; ask the user.
+- When showing config to the user, keep placeholders as they are; the user sees real values.
+<!-- redact-guard:end -->

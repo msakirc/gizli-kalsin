@@ -1,0 +1,59 @@
+# Container mode: Claude Code runs in `dev`, which sits on an internal network
+# with exactly one neighbour - the gateway. No route to the internet, your
+# LAN, or any database. Model traffic goes through the redacting gateway;
+# package installs go through its CONNECT allowlist.
+#
+#   PROJECT_DIR=/path/to/project docker compose -f container/docker-compose.yml up -d gateway
+#   PROJECT_DIR=/path/to/project docker compose -f container/docker-compose.yml run --rm dev
+#
+name: redact-guard
+
+services:
+  gateway:
+    build:
+      context: ..
+      dockerfile: container/Dockerfile.gateway
+    environment:
+      # Strongest: the API key lives only here. Remove to use claude.ai login instead.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY or edit this file}
+    volumes:
+      - guard-state:/state                  # vault + key: never mounted into dev
+      - guard-public:/public                # hook secret (the dev container gets it read-only)
+      - ../config/redact-guard.container.yaml:/etc/redact-guard.yaml:ro
+    command: ["python", "-m", "redact_guard", "serve", "-c", "/etc/redact-guard.yaml"]
+    networks: [sandbox, egress]
+    restart: unless-stopped
+
+  dev:
+    build:
+      context: ..
+      dockerfile: container/Dockerfile.dev
+    depends_on: [gateway]
+    working_dir: /workspace
+    volumes:
+      - ${PROJECT_DIR:?set PROJECT_DIR}:/workspace
+      - claude-home:/home/dev/.claude
+      - guard-public:/etc/redact-guard:ro   # lets the prompt hook verify it's the real gateway
+    environment:
+      ANTHROPIC_BASE_URL: http://gateway:8787
+      REDACT_GUARD_URL: http://gateway:8787
+      ANTHROPIC_AUTH_TOKEN: dummy-gateway-holds-the-key
+      HTTPS_PROXY: http://gateway:8788
+      HTTP_PROXY: http://gateway:8788
+      NO_PROXY: gateway
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1"
+    networks: [sandbox]
+    stdin_open: true
+    tty: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+networks:
+  sandbox:
+    internal: true      # no external connectivity at all
+  egress: {}
+
+volumes:
+  guard-state: {}
+  guard-public: {}
+  claude-home: {}

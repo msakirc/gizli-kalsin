@@ -1,0 +1,19 @@
+upstream: https://api.anthropic.com
+listen: {host: 0.0.0.0, port: 8787}
+api_key_env: ANTHROPIC_API_KEY
+unknown_post: block
+vault: {dir: /state, key_file: /state/key, persist: true}
+audit_log: /state/audit.jsonl
+hook_secret_file: /public/hook-secret
+binary_blocks: strip
+detectors:
+  extra_internal_domains: []   # add your company domains
+egress:
+  enabled: true
+  port: 8788
+  ports: [443]
+  allow:
+    - registry.npmjs.org
+    - pypi.org
+    - files.pythonhosted.org
+    # github.com / gitlab.com accept pushes: add them only if the shell needs them

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "ANTHROPIC_BASE_URL": "{{GATEWAY_URL}}",
+    "REDACT_GUARD_URL": "{{GATEWAY_URL}}",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Bash(psql *)",
+      "Bash(pg_dump *)",
+      "Bash(pg_dumpall *)",
+      "Bash(pg_restore *)",
+      "Bash(pgcli *)",
+      "Bash(mysql *)",
+      "Bash(mysqldump *)",
+      "Bash(mysqlsh *)",
+      "Bash(mariadb *)",
+      "Bash(mycli *)",
+      "Bash(mongo *)",
+      "Bash(mongosh *)",
+      "Bash(mongodump *)",
+      "Bash(mongoexport *)",
+      "Bash(redis-cli *)",
+      "Bash(valkey-cli *)",
+      "Bash(sqlite3 *)",
+      "Bash(duckdb *)",
+      "Bash(sqlcmd *)",
+      "Bash(sqlplus *)",
+      "Bash(cqlsh *)",
+      "Bash(clickhouse-client *)",
+      "Bash(influx *)",
+      "Bash(cockroach *)",
+      "Bash(usql *)",
+      "Bash(etcdctl *)",
+      "Bash(kubectl exec *)",
+      "Bash(kubectl port-forward *)",
+      "Bash(kubectl cp *)",
+      "Bash(kubectl get secret *)",
+      "Bash(kubectl get secrets *)",
+      "Bash(kubectl describe secret *)",
+      "Bash(docker exec *)",
+      "Bash(docker compose exec *)",
+      "Bash(docker-compose exec *)",
+      "Read(**/*.sqlite)",
+      "Read(**/*.sqlite3)",
+      "Read(**/*.db)",
+      "Read(**/*.dump)",
+      "Read(**/*.rdb)",
+      "Read(**/*.duckdb)",
+      "Read(~/.pgpass)",
+      "Read(~/.my.cnf)",
+      "Read(~/.mylogin.cnf)",
+      "Read(~/.psql_history)",
+      "Read(~/.mysql_history)",
+      "Read(~/.config/redact-guard/**)",
+      "Read(~/.local/share/redact-guard/**)",
+      "Edit(~/.config/redact-guard/**)",
+      "Edit(~/.local/share/redact-guard/**)",
+      "Edit(~/.claude/settings.json)",
+      "Read(**/*.mdf)",
+      "Read(**/*.ldf)",
+      "Read(**/pgpass.conf)",
+      "Read(**/*.udl)"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PYTHON}} {{GUARD_PY}} prompt-submit",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PYTHON}} {{GUARD_PY}} pre-tool-use",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "network": {
+      "allowedDomains": [
+        "registry.npmjs.org",
+        "pypi.org",
+        "files.pythonhosted.org",
+        "proxy.golang.org",
+        "crates.io",
+        "static.crates.io",
+        "repo.maven.apache.org",
+        "repo1.maven.org"
+      ]
+    },
+    "credentials": {
+      "files": [
+        {
+          "path": "~/.ssh",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.aws",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.kube",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.pgpass",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.my.cnf",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.config/redact-guard",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.local/share/redact-guard",
+          "mode": "deny"
+        }
+      ]
+    }
+  },
+  "disableRemoteControl": true
+}

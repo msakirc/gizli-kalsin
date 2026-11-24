@@ -1,0 +1,29 @@
+# redact-guard as a separate system user: the vault key and vault live in /var/lib/redact-guard
+# (0700, owned by redact-guard), so nothing Claude Code runs as you can read them.
+[Unit]
+Description=redact-guard (redacting proxy for Claude Code)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=redact-guard
+Group=redact-guard
+WorkingDirectory=/opt/redact-guard
+ExecStart=/opt/redact-guard/.venv/bin/python -E -m redact_guard proxy -c /etc/redact-guard/redact-guard.yaml
+Restart=always
+RestartSec=2
+StateDirectory=redact-guard
+StateDirectoryMode=0700
+UMask=0077
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/redact-guard
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

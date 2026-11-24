@@ -1,0 +1,7 @@
+203.0.113.77 - - [20/Nov/2026:10:12:01 +0300] "GET /api/orders?email=ayse.demir@gmail.com HTTP/1.1" 200 512 "-" "Mozilla/5.0"
+10.0.4.17 - deploy [20/Nov/2026:10:12:02 +0300] "POST /login HTTP/1.1" 401 0 "-" "curl/8.5.0"
+2026-11-20T10:12:03Z ERROR auth failed user=mehmet.kaya password=Hunter2024! token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U
+2026-11-20T10:12:04Z INFO customer tckn=10000000146 iban=TR330006100519786457841326 phone=+90 532 123 45 67
+2026-11-20T10:12:05Z INFO card 4111 1111 1111 1111 charged; ipv6 2001:db8:85a3::8a2e:370:7334
+Authorization: Bearer abcDEF123456ghiJKL789mnoPQR
+ssh deploy@10.0.4.17 -i /home/omer/.ssh/id_ed25519
